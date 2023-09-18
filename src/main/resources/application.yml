@@ -1,0 +1,5 @@
+
+app:
+  aws:
+    cognito:
+      clientId: ${COGNITO_CLIENT_ID}
