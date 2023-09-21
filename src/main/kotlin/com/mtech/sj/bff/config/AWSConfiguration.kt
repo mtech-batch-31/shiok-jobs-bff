@@ -9,7 +9,7 @@ import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityPr
 class AWSConfiguration {
 
     @Bean
-    fun cognitoClient(): CognitoIdentityProviderClient =
+    fun cognitoIdentityProviderClient(): CognitoIdentityProviderClient =
         CognitoIdentityProviderClient.builder()
             .region(AP_SOUTHEAST_1)
             .build()

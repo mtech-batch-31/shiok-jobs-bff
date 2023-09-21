@@ -1,6 +1,8 @@
 package com.mtech.sj.bff.auth
 
-import com.mtech.sj.bff.config.AppConfiguration
+
+import com.mtech.sj.bff.config.AppConfig
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Repository
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType
@@ -12,7 +14,10 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpReque
 import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpResponse
 
 @Repository
-class CognitoClient(private val cognitoIdentityProviderClient: CognitoIdentityProviderClient, config: AppConfiguration) {
+class CognitoClient(
+    private val cognitoIdentityProviderClient: CognitoIdentityProviderClient,
+    @Qualifier("appConfig") config: AppConfig
+) {
 
     private val clientId = config.aws.cognito.clientId
 
@@ -26,6 +31,10 @@ class CognitoClient(private val cognitoIdentityProviderClient: CognitoIdentityPr
                     AttributeType.builder()
                         .name("email")
                         .value(email)
+                        .build(),
+                    AttributeType.builder()
+                        .name("custom:role")
+                        .value("jobSeeker")
                         .build()
                 )
                 .build()

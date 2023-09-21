@@ -14,14 +14,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig {
     @Bean
     fun securityFilterChain(http: HttpSecurity): DefaultSecurityFilterChain =
-        http.run {
-            authorizeHttpRequests {
-                it.requestMatchers("/api/**").hasRole("USER")
-                    .anyRequest().authenticated()
-            }
-            csrf { it.disable() }
-            formLogin(withDefaults())
-            addFilterBefore(JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
-            build()
+        http.authorizeHttpRequests {
+            it.requestMatchers("/api/auth/**")
+                .permitAll()
+            it.requestMatchers("/api/**")
+                .hasRole("jobSeeker")
+                .anyRequest()
+                .authenticated()
         }
+            .csrf { it.disable() }
+            .formLogin(withDefaults())
+            .addFilterBefore(JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
+            .build()
 }
+
