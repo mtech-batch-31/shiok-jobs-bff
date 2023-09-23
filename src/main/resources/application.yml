@@ -3,6 +3,4 @@ app:
   aws:
     cognito:
       clientId: ${COGNITO_CLIENT_ID}
-spring:
-  main:
-    allow-bean-definition-overriding: true
+      clientSecret: ${COGNITO_CLIENT_SECRET}

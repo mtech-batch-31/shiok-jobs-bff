@@ -14,4 +14,5 @@ class AWSConfig {
 
 class CognitoConfig {
     lateinit var clientId: String
+    lateinit var clientSecret: String
 }

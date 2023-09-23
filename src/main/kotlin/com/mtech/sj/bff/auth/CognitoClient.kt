@@ -12,6 +12,11 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAut
 import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthResponse
 import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpRequest
 import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpResponse
+import java.io.UnsupportedEncodingException
+import java.nio.charset.StandardCharsets
+import java.util.Base64
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 
 @Repository
 class CognitoClient(
@@ -20,11 +25,13 @@ class CognitoClient(
 ) {
 
     private val clientId = config.aws.cognito.clientId
+    private val clientSecret = config.aws.cognito.clientSecret
 
     fun register(email: String, password: String): SignUpResponse =
         cognitoIdentityProviderClient.signUp(
             SignUpRequest.builder()
                 .clientId(clientId)
+                .secretHash(calculateSecretHash(clientId, clientSecret, email))
                 .username(email)
                 .password(password)
                 .userAttributes(
@@ -32,10 +39,10 @@ class CognitoClient(
                         .name("email")
                         .value(email)
                         .build(),
-                    AttributeType.builder()
-                        .name("custom:role")
-                        .value("jobSeeker")
-                        .build()
+//                    AttributeType.builder()
+//                        .name("role")
+//                        .value("jobSeeker")
+//                        .build()
                 )
                 .build()
         )
@@ -47,7 +54,8 @@ class CognitoClient(
                 .authParameters(
                     mapOf(
                         "USERNAME" to username,
-                        "PASSWORD" to password
+                        "PASSWORD" to password,
+                        "SECRET_HASH" to calculateSecretHash(clientId, clientSecret, username)
                     )
                 )
                 .clientId(clientId)
@@ -62,4 +70,18 @@ class CognitoClient(
                 .clientId(clientId)
                 .build()
         )
+
+    private fun calculateSecretHash(userPoolClientId: String, userPoolClientSecret: String, userName: String): String {
+        val macSha256Algorithm = "HmacSHA256"
+        val signingKey = SecretKeySpec(
+            userPoolClientSecret.toByteArray(StandardCharsets.UTF_8),
+            macSha256Algorithm
+        )
+            val mac = Mac.getInstance(macSha256Algorithm)
+            mac.init(signingKey)
+            mac.update(userName.toByteArray(StandardCharsets.UTF_8))
+            val rawHmac = mac.doFinal(userPoolClientId.toByteArray(StandardCharsets.UTF_8))
+            return Base64.getEncoder().encodeToString(rawHmac)
+    }
+
 }
