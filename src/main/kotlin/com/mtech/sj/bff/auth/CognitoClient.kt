@@ -1,6 +1,7 @@
 package com.mtech.sj.bff.auth
 
 
+import com.mtech.sj.bff.auth.dto.TokenResponse
 import com.mtech.sj.bff.config.AppConfig
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Repository
@@ -38,31 +39,29 @@ class CognitoClient(
                     AttributeType.builder()
                         .name("email")
                         .value(email)
-                        .build(),
-//                    AttributeType.builder()
-//                        .name("role")
-//                        .value("jobSeeker")
-//                        .build()
+                        .build()
                 )
                 .build()
         )
 
-    fun login(username: String, password: String): InitiateAuthResponse =
+    fun login(username: String, password: String) =
         cognitoIdentityProviderClient.initiateAuth(
-            InitiateAuthRequest.builder()
-                .authFlow(USER_PASSWORD_AUTH)
-                .authParameters(
-                    mapOf(
-                        "USERNAME" to username,
-                        "PASSWORD" to password,
-                        "SECRET_HASH" to calculateSecretHash(clientId, clientSecret, username)
-                    )
-                )
-                .clientId(clientId)
-                .build()
-        )
+           InitiateAuthRequest.builder()
+               .authFlow(USER_PASSWORD_AUTH)
+               .authParameters(
+                   mapOf(
+                       "USERNAME" to username,
+                       "PASSWORD" to password,
+                       "SECRET_HASH" to calculateSecretHash(clientId, clientSecret, username)
+                   )
+               )
+               .clientId(clientId)
+               .build()
+       )
+            .authenticationResult()
+            .run { TokenResponse(idToken(), accessToken(), refreshToken()) }
 
-    fun refreshToken(refreshToken: String): InitiateAuthResponse =
+    fun refreshToken(refreshToken: String) =
         cognitoIdentityProviderClient.initiateAuth(
             InitiateAuthRequest.builder()
                 .authFlow(REFRESH_TOKEN_AUTH)
@@ -70,6 +69,8 @@ class CognitoClient(
                 .clientId(clientId)
                 .build()
         )
+            .authenticationResult()
+            .run { TokenResponse(idToken(), accessToken(), refreshToken()) }
 
     private fun calculateSecretHash(userPoolClientId: String, userPoolClientSecret: String, userName: String): String {
         val macSha256Algorithm = "HmacSHA256"
