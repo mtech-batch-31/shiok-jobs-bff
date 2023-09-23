@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import org.springframework.web.server.ServerWebInputException
 import reactor.core.publisher.Mono
 import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException
 import java.net.BindException
@@ -42,7 +43,8 @@ class GlobalExceptionHandler {
         BindException::class,
         JsonParseException::class,
         IllegalStateException::class,
-        MethodArgumentTypeMismatchException::class
+        MethodArgumentTypeMismatchException::class,
+        ServerWebInputException::class
     )
     fun handleValidationExceptions(ex: Exception): Mono<ExceptionResponse> {
         val errorMassage = when (ex) {
@@ -50,10 +52,9 @@ class GlobalExceptionHandler {
                 ex.bindingResult
                     .fieldErrors
                     .joinToString(", ") { "${it.field}: ${it.defaultMessage}" }
-
-            else -> {
-                ex.message.orEmpty()
-            }
+            is ServerWebInputException ->
+                ex.reason.orEmpty()
+            else -> ex.message.orEmpty()
         }
         return Mono.just(
 
