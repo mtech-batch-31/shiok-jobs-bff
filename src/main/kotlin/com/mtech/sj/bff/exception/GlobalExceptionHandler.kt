@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.json.JsonParseException
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -14,11 +15,25 @@ import reactor.core.publisher.Mono
 import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException
 import java.net.BindException
 
-
 val logger: Logger = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
+
+    @ExceptionHandler(AppException::class)
+    fun handleAppExceptions(ex: AppException) =
+        Mono.just(
+            ResponseEntity
+                .status(ex.httpStatusCode)
+                .body(ExceptionResponse(ex.message!!))
+        )
+            .also {
+                if (ex.httpStatusCode.is5xxServerError) {
+                    logger.error(ex.message, ex)
+                } else {
+                    logger.warn(ex.message, ex)
+                }
+            }
 
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(
@@ -31,9 +46,10 @@ class GlobalExceptionHandler {
     )
     fun handleValidationExceptions(ex: Exception): Mono<ExceptionResponse> {
         val errorMassage = when (ex) {
-            is MethodArgumentNotValidException -> ex.bindingResult
-                .fieldErrors
-                .joinToString(", ") { "${it.field}: ${it.defaultMessage}" }
+            is MethodArgumentNotValidException ->
+                ex.bindingResult
+                    .fieldErrors
+                    .joinToString(", ") { "${it.field}: ${it.defaultMessage}" }
 
             else -> {
                 ex.message.orEmpty()
@@ -48,8 +64,8 @@ class GlobalExceptionHandler {
     @ExceptionHandler(CognitoIdentityProviderException::class)
     fun handleInvalidParameterException(ex: CognitoIdentityProviderException): Mono<ExceptionResponse> =
         Mono.just(ExceptionResponse(ex.message ?: "An error occurred."))
-            .also { logger.error("code is: " +ex.statusCode() + ex.message, ex)
-
+            .also {
+                logger.error("code is: " + ex.statusCode() + ex.message, ex)
             }
 
     @ResponseStatus(INTERNAL_SERVER_ERROR)

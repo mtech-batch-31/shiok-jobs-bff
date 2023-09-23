@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @ConfigurationProperties(prefix = "app")
 class AppConfig {
-    val service= ServiceConfig()
+    val service = ServiceConfig()
     val aws = AWSConfig()
 }
 
