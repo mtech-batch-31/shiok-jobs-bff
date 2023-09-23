@@ -30,9 +30,9 @@ class GlobalExceptionHandler {
         )
             .also {
                 if (ex.httpStatusCode.is5xxServerError) {
-                    logger.error(ex.message, ex)
-                } else {
-                    logger.warn(ex.message, ex)
+                    logger.error(ex.message)
+                } else if (ex.httpStatusCode.is4xxClientError) {
+                    logger.warn(ex.message)
                 }
             }
 
@@ -57,17 +57,14 @@ class GlobalExceptionHandler {
             else -> ex.message.orEmpty()
         }
         return Mono.just(
-
             ExceptionResponse(errorMassage)
-        ).also { logger.warn(ex.message, ex) }
+        ).also { logger.warn(ex.message) }
     }
 
     @ExceptionHandler(CognitoIdentityProviderException::class)
     fun handleInvalidParameterException(ex: CognitoIdentityProviderException): Mono<ExceptionResponse> =
         Mono.just(ExceptionResponse(ex.message ?: "An error occurred."))
-            .also {
-                logger.error("code is: " + ex.statusCode() + ex.message, ex)
-            }
+            .also { logger.error("code is: " + ex.statusCode() + ex.message) }
 
     @ResponseStatus(INTERNAL_SERVER_ERROR)
     @ExceptionHandler(RuntimeException::class)
