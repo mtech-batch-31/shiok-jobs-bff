@@ -19,7 +19,7 @@ class AuthController(private val cognitoClient: CognitoClient) {
 
     @PostMapping("/login")
     fun login(@RequestBody request: LoginRequest) =
-        Mono.fromCallable { cognitoClient.login(request.username, request.password) }
+        Mono.fromCallable { cognitoClient.login(request.email, request.password) }
 
     @PostMapping("/refresh")
     fun refreshToken(@RequestBody request: RefreshTokenRequest) =

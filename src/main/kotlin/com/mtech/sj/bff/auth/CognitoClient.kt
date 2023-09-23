@@ -10,10 +10,8 @@ import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeTy
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType.REFRESH_TOKEN_AUTH
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType.USER_PASSWORD_AUTH
 import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthRequest
-import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthResponse
 import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpRequest
 import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpResponse
-import java.io.UnsupportedEncodingException
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 import javax.crypto.Mac
@@ -44,15 +42,15 @@ class CognitoClient(
                 .build()
         )
 
-    fun login(username: String, password: String) =
+    fun login(email: String, password: String) =
         cognitoIdentityProviderClient.initiateAuth(
            InitiateAuthRequest.builder()
                .authFlow(USER_PASSWORD_AUTH)
                .authParameters(
                    mapOf(
-                       "USERNAME" to username,
+                       "USERNAME" to email,
                        "PASSWORD" to password,
-                       "SECRET_HASH" to calculateSecretHash(clientId, clientSecret, username)
+                       "SECRET_HASH" to calculateSecretHash(clientId, clientSecret, email)
                    )
                )
                .clientId(clientId)

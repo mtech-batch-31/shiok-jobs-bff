@@ -6,8 +6,14 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @ConfigurationProperties(prefix = "app")
 class AppConfig {
+    val service= ServiceConfig()
     val aws = AWSConfig()
 }
+
+class ServiceConfig {
+    lateinit var frontend: String
+}
+
 class AWSConfig {
     val cognito = CognitoConfig()
 }
