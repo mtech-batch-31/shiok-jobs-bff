@@ -6,3 +6,4 @@ app:
       clientSecret: ${COGNITO_CLIENT_SECRET}
   service:
     frontend: ${FRONTEND_SERVICE}
+    jobService: ${JOB_SERVICE}
