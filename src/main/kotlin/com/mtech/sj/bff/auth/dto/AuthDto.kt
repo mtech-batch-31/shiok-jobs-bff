@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email
 
 data class RegisterRequest(
     @field:Email(message = "Username must be a valid email address.")
-    val username: String,
+    val email: String,
     val password: String
 )
 

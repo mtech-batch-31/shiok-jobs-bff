@@ -15,7 +15,7 @@ class AuthController(private val cognitoClient: CognitoClient) {
 
     @PostMapping("/register")
     fun register(@RequestBody request: RegisterRequest) =
-        Mono.fromCallable { cognitoClient.register(request.username, request.password) }
+        Mono.fromCallable { cognitoClient.register(request.email, request.password) }
 
     @PostMapping("/login")
     fun login(@RequestBody request: LoginRequest) =
