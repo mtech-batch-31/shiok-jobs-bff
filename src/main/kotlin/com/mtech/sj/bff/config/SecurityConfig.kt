@@ -20,7 +20,7 @@ class SecurityConfig @Autowired constructor(private val appConfig: AppConfig) {
             PathPatternParserServerWebExchangeMatcher("/api/**")
         )
             .authorizeExchange {
-                it.pathMatchers("/api/auth/**")
+                it.pathMatchers("/api/auth/**", "/api/test")
                     .permitAll()
                 it.pathMatchers("/api/**")
                     .hasRole("jobSeeker")
