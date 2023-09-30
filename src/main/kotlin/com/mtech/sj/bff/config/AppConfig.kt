@@ -6,12 +6,18 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @ConfigurationProperties(prefix = "app")
 class AppConfig {
-    val service = ServiceConfig()
+    val services = ServiceConfig()
     val aws = AWSConfig()
 }
 
 class ServiceConfig {
     lateinit var frontend: String
+    val backend: List<BackendService> = ArrayList()
+}
+
+class BackendService {
+    lateinit var name: String
+    lateinit var url: String
 }
 
 class AWSConfig {

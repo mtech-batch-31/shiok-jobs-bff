@@ -1,7 +1,7 @@
 package com.mtech.sj.bff.exception
 
-import org.springframework.http.HttpStatusCode
+import org.springframework.http.HttpStatus
 abstract class AppException(
     message: String,
-    public val httpStatusCode: HttpStatusCode
+    val httpStatusCode: HttpStatus
 ) : RuntimeException(message)

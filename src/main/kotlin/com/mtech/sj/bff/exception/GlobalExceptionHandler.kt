@@ -5,12 +5,14 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.json.JsonParseException
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import org.springframework.web.reactive.resource.NoResourceFoundException
 import org.springframework.web.server.ServerWebInputException
 import reactor.core.publisher.Mono
 import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException
@@ -35,6 +37,12 @@ class GlobalExceptionHandler {
                     logger.warn(ex.message)
                 }
             }
+
+    @ResponseStatus(NOT_FOUND)
+    @ExceptionHandler(NoResourceFoundException::class)
+    fun handleNoResourceFoundExceptions(ex: NoResourceFoundException) =
+        Mono.just(ExceptionResponse(ex.reason!!))
+            .also { logger.error(ex.message, ex) }
 
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(

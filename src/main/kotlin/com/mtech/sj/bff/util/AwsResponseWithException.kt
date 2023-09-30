@@ -1,13 +1,12 @@
 package com.mtech.sj.bff.util
 
 import com.mtech.sj.bff.exception.AwsException
-import org.springframework.http.HttpStatusCode
+import org.springframework.http.HttpStatus
 import software.amazon.awssdk.services.cognitoidentityprovider.model.CognitoIdentityProviderException
 
-fun <T> withAwsException(block: () -> T): T {
+fun <T> withAwsException(block: () -> T) =
     try {
-        return block()
+        block()
     } catch (e: CognitoIdentityProviderException) {
-        throw AwsException(e.message!!, HttpStatusCode.valueOf(e.statusCode()))
+        throw AwsException(e.message!!, HttpStatus.valueOf(e.statusCode()))
     }
-}

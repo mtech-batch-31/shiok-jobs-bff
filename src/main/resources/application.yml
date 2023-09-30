@@ -4,6 +4,10 @@ app:
     cognito:
       clientId: ${COGNITO_CLIENT_ID}
       clientSecret: ${COGNITO_CLIENT_SECRET}
-  service:
+  services:
     frontend: ${FRONTEND_SERVICE}
-    jobService: ${JOB_SERVICE}
+    backend:
+      - name: job
+        url: ${JOB_SERVICE}
+      - name: user
+        url: ${USER_SERVICE}
