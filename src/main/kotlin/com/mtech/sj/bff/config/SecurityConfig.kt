@@ -17,10 +17,12 @@ class SecurityConfig(private val appConfig: AppConfig) {
     @Bean
     fun securityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain =
         http.securityMatcher(
-            PathPatternParserServerWebExchangeMatcher("/api/**")
+            PathPatternParserServerWebExchangeMatcher(
+                "/api/**"
+            )
         )
             .authorizeExchange {
-                it.pathMatchers("/api/auth/**", "/api/test")
+                it.pathMatchers("/api/auth/**", "/api/test", "/api/job/**")
                     .permitAll()
                 it.pathMatchers("/api/**")
                     .hasRole("jobSeeker")
