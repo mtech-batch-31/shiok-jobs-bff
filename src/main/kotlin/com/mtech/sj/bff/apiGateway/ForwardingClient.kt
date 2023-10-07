@@ -8,6 +8,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.toEntity
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.bodyToMono
+import java.net.URI
 
 @Repository
 class ForwardingClient(private val webClients: Map<String, WebClient>) {
@@ -16,10 +17,13 @@ class ForwardingClient(private val webClients: Map<String, WebClient>) {
             webClients[serviceName]
                 .also { it ?: throw ServiceNotFoundException("Service $serviceName is not found") }!!
                 .method(originalRequest.method())
-                .uri(originalRequest.uri().path.replaceFirst("/api/$serviceName", ""))
+                .uri(parserUri(originalRequest.uri(),serviceName))
                 .headers { it.addAll(originalRequest.headers().asHttpHeaders()) }
                 .body(originalRequest.bodyToMono<String>(), String::class.java)
                 .exchangeToMono { it.toEntity<String>() }
                 .flatMap { createServerResponse(it) }
         }
+
+    private fun parserUri(originalUri: URI,serviceName:String) =
+            "${originalUri.path.replaceFirst("/api/$serviceName", "")}${originalUri.query?.let { "?$it" } ?: ""}"
 }
