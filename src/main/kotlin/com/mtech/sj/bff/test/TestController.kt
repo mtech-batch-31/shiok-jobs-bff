@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.RestController
 class TestController {
 
     @GetMapping
-    fun test() = hashMapOf("greeting" to "Hello World")
+    fun test() = hashMapOf("greeting" to "Hello World from BFF")
 }
