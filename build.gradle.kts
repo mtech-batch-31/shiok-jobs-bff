@@ -23,13 +23,34 @@ repositories {
     maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
-dependencies {
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
+val springBootVersion = "3.1.0"
+val springVersion = "6.0.12"
+val springSecurityVersion = "6.1.4"
 
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-security:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-validation:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-webflux:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-reactor-netty:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-autoconfigure:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-logging:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-json:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-json:$springBootVersion")
+
+    implementation("org.springframework:spring-core:$springVersion")
+    implementation("org.springframework:spring-context:$springVersion")
+    implementation("org.springframework:spring-beans:$springVersion")
+    implementation("org.springframework:spring-webflux:$springVersion")
+    implementation("org.springframework:spring-web:$springVersion")
+
+    implementation("org.springframework.security:spring-security-web:$springSecurityVersion")
+    implementation("org.springframework.security:spring-security-config:$springSecurityVersion")
+    implementation("org.springframework.security:spring-security-crypto:$springSecurityVersion")
+    implementation("org.springframework.security:spring-security-core:$springSecurityVersion")
+
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
 
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
@@ -39,7 +60,7 @@ dependencies {
     implementation("software.amazon.awssdk:cognitoidentityprovider:2.20.149")
 
     compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:$springVersion")
 }
 
 tasks.withType<KotlinCompile> {
