@@ -45,4 +45,23 @@ class SecurityConfig(private val appConfig: AppConfig) {
                 }
             )
         }
+
+
+//    @Bean
+//    fun jwtDecoder(): NimbusReactiveJwtDecoder {
+//        // Configure your JWT decoder here (e.g., JWKS URL)
+//        return NimbusReactiveJwtDecoder
+//                .withJwkSetUri("https://cognito-idp..amazonaws.com//.well-known/jwks.json")
+//                .build()
+//    }
+
+//    @Bean
+//    fun jwtDecoder(): ReactiveJwtDecoder {
+//        // Configure your JWT decoder here (e.g., JWKS URL)
+//        return ReactiveJwtDecoders.fromIssuerLocation("https://cognito-idp..amazonaws.com//.well-known/jwks.json")
+//    }
+//    @Bean
+//    fun jwtReactiveAuthenticationManager(): JwtReactiveAuthenticationManager {
+//        return JwtReactiveAuthenticationManager(jwtDecoder())
+//    }
 }
