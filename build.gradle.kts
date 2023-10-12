@@ -62,7 +62,7 @@ dependencies {
     implementation("software.amazon.awssdk:cognitoidentityprovider:2.20.149")
 
     compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
-    testImplementation("org.springframework.boot:spring-boot-starter-test:$springVersion")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 tasks.withType<KotlinCompile> {
