@@ -8,6 +8,8 @@ plugins {
     // id("io.gitlab.arturbosch.detekt") version "1.23.1"
     kotlin("jvm") version "1.9.10"
     kotlin("plugin.spring") version "1.9.10"
+    jacoco
+    id("org.sonarqube") version "4.3.1.3277"
 }
 
 group = "com.mtech.sj.bff"
@@ -23,14 +25,34 @@ repositories {
     maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
+val springBootVersion = "3.1.0"
+val springVersion = "6.0.12"
+val springSecurityVersion = "6.1.4"
+
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
-    implementation ("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.springframework.boot:spring-boot-starter:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-security:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-validation:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-webflux:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-reactor-netty:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-autoconfigure:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-logging:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-json:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-json:$springBootVersion")
+
+    implementation("org.springframework:spring-core:$springVersion")
+    implementation("org.springframework:spring-context:$springVersion")
+    implementation("org.springframework:spring-beans:$springVersion")
+    implementation("org.springframework:spring-webflux:$springVersion")
+    implementation("org.springframework:spring-web:$springVersion")
+
+    implementation("org.springframework.security:spring-security-web:$springSecurityVersion")
+    implementation("org.springframework.security:spring-security-config:$springSecurityVersion")
+    implementation("org.springframework.security:spring-security-crypto:$springSecurityVersion")
+    implementation("org.springframework.security:spring-security-core:$springSecurityVersion")
+
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.0")
 
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
@@ -42,6 +64,8 @@ dependencies {
 
     compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+    implementation ("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
 }
 
 tasks.withType<KotlinCompile> {
@@ -51,11 +75,50 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-tasks.withType<Test> {
+tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
 }
 
 tasks.getByName<BootJar>("bootJar") {
     archiveFileName = "sj_bff.jar"
     enabled = true
+}
+
+sonarqube {
+
+    properties {
+        property("sonar.projectKey", "mtech-batch-31_shiok-jobs-bff")
+        property("sonar.organization", "mtech-batch-31")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+    }
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+    finalizedBy(tasks.jacocoTestCoverageVerification)
+
+    reports {
+        xml.required = true
+        html.required = true
+    }
+
+    classDirectories.setFrom(
+        sourceSets.main.get().output.asFileTree.matching {
+            exclude("com/mtech/sj/bff/Application*")
+        }
+    )
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            classDirectories.setFrom(
+                sourceSets.main.get().output.asFileTree.matching {
+                    exclude("com/mtech/sj/bff/Application*")
+                }
+            )
+        }
+    }
 }

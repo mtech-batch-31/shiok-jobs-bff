@@ -21,6 +21,22 @@ spec:
       containers:
         - name: sj-bff
           image: ${IMAGE_NAME}
+          env:
+            - name: COGNITO_CLIENT_ID
+              value: ${COGNITO_CLIENT_ID}
+
+            - name: COGNITO_CLIENT_SECRET
+              value: ${COGNITO_CLIENT_SECRET}
+
+            - name: FRONTEND_SERVICE
+              value: ${FRONTEND_URL}
+
+            - name: JOB_SERVICE
+              value: ${JOB_SERVICE_URL}
+
+            - name: USER_SERVICE
+              value: ${USER_SERVICE_URL}
+
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
