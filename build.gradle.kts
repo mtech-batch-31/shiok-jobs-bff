@@ -105,18 +105,16 @@ tasks.jacocoTestReport {
             exclude("com/mtech/sj/bff/Application*")
         }
     )
-
-
 }
 
 tasks.jacocoTestCoverageVerification {
     violationRules {
         rule {
-            classDirectories.setFrom(sourceSets.main.get().output.asFileTree.matching {
-                exclude("com/mtech/sj/bff/Application*")
-            })
-
+            classDirectories.setFrom(
+                sourceSets.main.get().output.asFileTree.matching {
+                    exclude("com/mtech/sj/bff/Application*")
+                }
+            )
         }
     }
 }
-
