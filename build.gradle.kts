@@ -8,6 +8,8 @@ plugins {
     // id("io.gitlab.arturbosch.detekt") version "1.23.1"
     kotlin("jvm") version "1.9.10"
     kotlin("plugin.spring") version "1.9.10"
+    jacoco
+    id("org.sonarqube") version "3.5.0.2730"
 }
 
 group = "com.mtech.sj.bff"
@@ -70,11 +72,51 @@ tasks.withType<KotlinCompile> {
     }
 }
 
-tasks.withType<Test> {
+tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
 }
 
 tasks.getByName<BootJar>("bootJar") {
     archiveFileName = "sj_bff.jar"
     enabled = true
 }
+
+sonarqube {
+
+    properties {
+        property("sonar.projectKey", "mtech-batch-31_shiok-jobs-bff")
+        property("sonar.organization", "mtech-batch-31")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+    }
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+    finalizedBy(tasks.jacocoTestCoverageVerification)
+
+    reports {
+        xml.required = true
+    }
+
+    classDirectories.setFrom(
+        sourceSets.main.get().output.asFileTree.matching {
+            exclude("com/mtech/sj/bff/Application*")
+        }
+    )
+
+
+}
+
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            classDirectories.setFrom(sourceSets.main.get().output.asFileTree.matching {
+                exclude("com/mtech/sj/bff/Application*")
+            })
+
+        }
+    }
+}
+
