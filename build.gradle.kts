@@ -9,7 +9,7 @@ plugins {
     kotlin("jvm") version "1.9.10"
     kotlin("plugin.spring") version "1.9.10"
     jacoco
-    id("org.sonarqube") version "3.5.0.2730"
+    id("org.sonarqube") version "4.3.1.3277"
 }
 
 group = "com.mtech.sj.bff"
@@ -98,6 +98,7 @@ tasks.jacocoTestReport {
 
     reports {
         xml.required = true
+        html.required = true
     }
 
     classDirectories.setFrom(
