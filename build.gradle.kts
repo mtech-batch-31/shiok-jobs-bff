@@ -58,6 +58,8 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
     implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+
     implementation("software.amazon.awscdk:cognito:1.204.0")
     implementation("software.amazon.awssdk:cognitoidentityprovider:2.20.149")
     implementation("org.projectlombok:lombok:1.18.26")
