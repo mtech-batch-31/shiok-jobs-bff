@@ -3,8 +3,13 @@ package com.mtech.sj.bff.auth
 import com.mtech.sj.bff.auth.dto.LoginRequest
 import com.mtech.sj.bff.auth.dto.RefreshTokenRequest
 import com.mtech.sj.bff.auth.dto.RegisterRequest
+import com.mtech.sj.bff.util.JwtUtil
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
@@ -24,4 +29,16 @@ class AuthController(private val cognitoClient: CognitoClient) {
     @PostMapping("/refresh")
     fun refreshToken(@RequestBody request: RefreshTokenRequest) =
         Mono.fromCallable { cognitoClient.refreshToken(request.refreshToken) }
+
+    @GetMapping("/verifyToken")
+    fun verifyToken(@RequestHeader("Authorization") authorizationHeader: String): ResponseEntity<Map<String,String>> {
+        val response: MutableMap<String, String> = HashMap();
+        try {
+            return ResponseEntity.ok(JwtUtil.getDecryptedJwtFromJwt(authorizationHeader));
+        } catch (e: Exception) {
+            e.printStackTrace();
+            response.put("message", "Token verification failed: ${e.message}")
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+    }
 }

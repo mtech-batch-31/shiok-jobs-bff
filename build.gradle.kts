@@ -28,7 +28,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
-
+    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+    implementation ("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
@@ -37,6 +38,7 @@ dependencies {
 
     implementation("software.amazon.awscdk:cognito:1.204.0")
     implementation("software.amazon.awssdk:cognitoidentityprovider:2.20.149")
+    implementation("org.projectlombok:lombok:1.18.26")
 
     compileOnly("jakarta.servlet:jakarta.servlet-api:6.0.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
