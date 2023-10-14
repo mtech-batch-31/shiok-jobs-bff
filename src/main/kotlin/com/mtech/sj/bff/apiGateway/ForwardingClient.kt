@@ -9,7 +9,6 @@ import org.springframework.web.reactive.function.client.toEntity
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.bodyToMono
 import java.net.URI
-import java.net.http.HttpHeaders
 
 @Repository
 class ForwardingClient(private val webClients: Map<String, WebClient>) {
@@ -27,11 +26,4 @@ class ForwardingClient(private val webClients: Map<String, WebClient>) {
 
     private fun parserUri(originalUri: URI, serviceName: String) =
         "${originalUri.path.replaceFirst("/api/$serviceName", "")}${originalUri.query?.let { "?$it" } ?: ""}"
-
-//    private fun addUserUuidHeader(headers : HttpHeaders) : HttpHeaders {
-//        String token = headers.firstValue("Authorization")
-//    }
-
-
-
 }
