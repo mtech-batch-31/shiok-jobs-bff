@@ -1,9 +1,12 @@
 package com.mtech.sj.bff.config
 
+import com.mtech.sj.bff.auth.JwtAuthenticationFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder.AUTHENTICATION
 import org.springframework.security.config.web.server.ServerHttpSecurity
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher
@@ -13,7 +16,9 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 @Configuration(proxyBeanMethods = false)
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
-class SecurityConfig(private val appConfig: AppConfig) {
+class SecurityConfig(private val appConfig: AppConfig,
+    private val jwtAuthenticationFilter: JwtAuthenticationFilter
+) {
     @Bean
     fun securityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain =
         http.securityMatcher(
@@ -21,8 +26,9 @@ class SecurityConfig(private val appConfig: AppConfig) {
                 "/api/**"
             )
         )
+            .addFilterAt(jwtAuthenticationFilter, AUTHENTICATION)
             .authorizeExchange {
-                it.pathMatchers("/api/auth/**", "/api/test", "/api/job/**")
+                it.pathMatchers("/api/auth/**", "/api/test", "/api/job/**","api/user/**")
                     .permitAll()
                 it.pathMatchers("/api/**")
                     .hasRole("jobSeeker")

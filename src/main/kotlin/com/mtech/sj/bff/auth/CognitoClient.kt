@@ -6,11 +6,9 @@ import com.mtech.sj.bff.util.withAwsException
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Repository
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient
-import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType
+import software.amazon.awssdk.services.cognitoidentityprovider.model.*
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType.REFRESH_TOKEN_AUTH
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType.USER_PASSWORD_AUTH
-import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthRequest
-import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpRequest
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 import javax.crypto.Mac
@@ -25,7 +23,7 @@ class CognitoClient(
     private val clientId = config.aws.cognito.clientId
     private val clientSecret = config.aws.cognito.clientSecret
 
-    fun register(email: String, password: String) =
+    fun register(email: String, password: String): SignUpResponse =
         withAwsException {
             cognitoIdentityProviderClient.signUp(
                 SignUpRequest.builder()
@@ -74,6 +72,24 @@ class CognitoClient(
                 .authenticationResult()
                 .run { TokenResponse(idToken(), accessToken(), refreshToken()) }
         }
+
+    fun logout(refreshToken: String): Unit =
+        withAwsException {
+            cognitoIdentityProviderClient.globalSignOut(
+                GlobalSignOutRequest.builder()
+                    .accessToken(refreshToken)
+                    .build()
+            )
+        }
+
+    fun validate(accessToken: String):  Unit=
+        withAwsException {
+            cognitoIdentityProviderClient.getUser(
+                GetUserRequest.builder()
+                    .accessToken(accessToken)
+                    .build()
+            )
+    }
 
     private fun calculateSecretHash(userPoolClientId: String, userPoolClientSecret: String, userName: String): String {
         return Mac.getInstance(MACSHA_256_ALGORITHM)

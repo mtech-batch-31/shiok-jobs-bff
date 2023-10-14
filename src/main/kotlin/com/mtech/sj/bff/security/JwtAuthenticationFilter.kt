@@ -1,55 +1,63 @@
-package com.mtech.sj.bff.security
+package com.mtech.sj.bff.auth
 
-import io.jsonwebtoken.Jwts
-import jakarta.servlet.FilterChain
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.User
-import org.springframework.web.filter.OncePerRequestFilter
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.mtech.sj.bff.security.JwtPayload
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.http.server.reactive.ServerHttpRequest
+import org.springframework.stereotype.Component
+import org.springframework.web.server.ServerWebExchange
+import org.springframework.web.server.WebFilter
+import org.springframework.web.server.WebFilterChain
+import reactor.core.publisher.Mono
+import java.util.*
 
-class JwtAuthenticationFilter : OncePerRequestFilter() {
-    private val secretKey = "your_jwt_secret_key"
-    private val secretKeyBytes = secretKey.toByteArray(Charsets.UTF_8)
+val logger: Logger = LoggerFactory.getLogger(JwtPayload::class.java)
+@Component
+class JwtAuthenticationFilter(
+    private val cognitoClient: CognitoClient,
+    private val objectMapper: ObjectMapper
+) : WebFilter {
+    override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
+        val request = exchange.request
 
-    override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
-        val token = extractTokenFromRequest(request)
+        val idToken = request.headers.getFirst("x-id-token")
+        val accessToken = request.headers.getFirst("authorization")?.replace("Bearer ", "")
 
-        if (token != null && validateToken(token)) {
-            val authentication = getAuthentication(token)
-            if (authentication != null && authentication.authorities.any { it.authority == "ROLE_jobSeeker" }) {
-                SecurityContextHolder.getContext().authentication = authentication
-                filterChain.doFilter(request, response)
-            } else {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Insufficient privileges")
+        logger.info("idToken: $idToken")
+
+        accessToken?.also { cognitoClient.validate(it) }
+
+        return chain.filter(idToken?.let {
+            exchange.mutate()
+                .request(addHeadersToRequest(request, parseIdToken(it).toMap()))
+                .build()
+        } ?: exchange)
+    }
+
+    private fun parseIdToken(idToken: String): JwtPayload {
+        val splitToken = idToken.split('.')
+        if (splitToken.size != 3) {
+            throw IllegalArgumentException("Invalid JWT token")
+        }
+        val tokenBody = splitToken[1] // 获取 payload
+
+        logger.info("tokenBody: $tokenBody")
+
+        val decodedJson = String(Base64.getUrlDecoder().decode(tokenBody))
+
+        return objectMapper.readValue(decodedJson)
+    }
+
+    private fun addHeadersToRequest(request: ServerHttpRequest, headers: Map<String, String?>): ServerHttpRequest {
+        return request.mutate().headers { httpHeaders ->
+            headers.forEach { (name, value) ->
+                if (value != null) {
+                    httpHeaders.set(name, value)
+                }
             }
-        } else {
-            filterChain.doFilter(request, response)
-        }
-    }
-
-    private fun extractTokenFromRequest(request: HttpServletRequest): String? {
-        val bearerToken = request.getHeader("Authorization") ?: return null
-        if (!bearerToken.startsWith("Bearer ")) return null
-        return bearerToken.substring(7)
-    }
-
-    private fun validateToken(token: String): Boolean {
-        try {
-            Jwts.parserBuilder().setSigningKey(secretKeyBytes).build()
-            return true
-        } catch (e: Exception) {
-        }
-        return false
-    }
-
-    private fun getAuthentication(token: String): Authentication? {
-        val claims = Jwts.parserBuilder().setSigningKey(secretKeyBytes).build().parseClaimsJws(token).body
-        val authorities = (claims["roles"] as List<*>).map { SimpleGrantedAuthority(it as String) }
-        val principal = User(claims.subject, "", authorities)
-        return UsernamePasswordAuthenticationToken(principal, token, authorities)
+        }.build()
     }
 }
+
