@@ -6,10 +6,15 @@ import com.mtech.sj.bff.util.withAwsException
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Repository
 import software.amazon.awssdk.services.cognitoidentityprovider.CognitoIdentityProviderClient
-import software.amazon.awssdk.services.cognitoidentityprovider.model.*
+import software.amazon.awssdk.services.cognitoidentityprovider.model.AttributeType
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType.REFRESH_TOKEN_AUTH
 import software.amazon.awssdk.services.cognitoidentityprovider.model.AuthFlowType.USER_PASSWORD_AUTH
-import java.nio.charset.StandardCharsets
+import software.amazon.awssdk.services.cognitoidentityprovider.model.GetUserRequest
+import software.amazon.awssdk.services.cognitoidentityprovider.model.GlobalSignOutRequest
+import software.amazon.awssdk.services.cognitoidentityprovider.model.InitiateAuthRequest
+import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpRequest
+import software.amazon.awssdk.services.cognitoidentityprovider.model.SignUpResponse
+import java.nio.charset.StandardCharsets.UTF_8
 import java.util.Base64
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
@@ -82,28 +87,28 @@ class CognitoClient(
             )
         }
 
-    fun validate(accessToken: String):  Unit=
+    fun validate(accessToken: String): Unit =
         withAwsException {
             cognitoIdentityProviderClient.getUser(
                 GetUserRequest.builder()
                     .accessToken(accessToken)
                     .build()
             )
-    }
+        }
 
     private fun calculateSecretHash(userPoolClientId: String, userPoolClientSecret: String, userName: String): String {
         return Mac.getInstance(MACSHA_256_ALGORITHM)
             .apply {
                 init(
                     SecretKeySpec(
-                        userPoolClientSecret.toByteArray(StandardCharsets.UTF_8),
+                        userPoolClientSecret.toByteArray(UTF_8),
                         MACSHA_256_ALGORITHM
                     )
                 )
-                update(userName.toByteArray(StandardCharsets.UTF_8))
+                update(userName.toByteArray(UTF_8))
             }
             .run {
-                doFinal(userPoolClientId.toByteArray(StandardCharsets.UTF_8))
+                doFinal(userPoolClientId.toByteArray(UTF_8))
                     .let { Base64.getEncoder().encodeToString(it) }
             }
     }

@@ -1,6 +1,7 @@
 package com.mtech.sj.bff.util
 
 import com.mtech.sj.bff.exception.AwsException
+import com.mtech.sj.bff.exception.UnauthorizedException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -13,10 +14,12 @@ fun <T> withAwsException(block: () -> T) =
         block()
     } catch (e: CognitoIdentityProviderException) {
         logger.error("CognitoIdentityProviderException: ${e.message}")
-        if (e.message?.contains( "Invalid Access Token") == true)
-            throw AwsException("Invalid Access Token", HttpStatus.UNAUTHORIZED)
-        else if (e.message?.contains("Access Token has expired") == true)
-            throw AwsException("Access Token has expired", HttpStatus.UNAUTHORIZED)
-        else
+        if (e.message?.contains("Invalid Access Token") == true) {
+            throw UnauthorizedException("Invalid Access Token")
+        } else if (e.message?.contains("Access Token has expired") == true) {
+            // TODO: auto refresh token
+            throw UnauthorizedException("Access Token has expired")
+        } else {
             throw AwsException(e.message!!, HttpStatus.valueOf(e.statusCode()))
+        }
     }
