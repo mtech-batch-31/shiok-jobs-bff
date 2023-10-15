@@ -21,7 +21,7 @@ class JwtAuthenticationFilter(
         val request = exchange.request
 
         val idToken = request.headers.getFirst("x-id-token")
-        val accessToken = request.headers.getFirst("authorization")?.replace("Bearer ", "")
+        val accessToken = request.headers.getFirst("Authorization")?.replace("Bearer ", "")
 
         accessToken?.also { cognitoClient.validate(it) }
 

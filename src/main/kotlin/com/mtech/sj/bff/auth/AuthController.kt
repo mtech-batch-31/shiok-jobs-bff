@@ -31,6 +31,6 @@ class AuthController(private val cognitoClient: CognitoClient) {
         Mono.fromCallable { cognitoClient.logout(refreshToken) }
 
 //    @GetMapping("/validate")
-//    fun validate(@RequestHeader(name = "authorization") accessToken: String) =
+//    fun validate(@RequestHeader(name = "Authorization") accessToken: String) =
 //        Mono.fromCallable { cognitoClient.validate(accessToken.replace("Bearer", "")) }
 }
