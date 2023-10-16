@@ -27,6 +27,10 @@ class JwtAuthenticationFilter(
 
         return chain.filter(
             idToken?.let {
+                if (accessToken == null) {
+                    throw UnauthorizedException("Missing access token")
+                }
+
                 exchange.mutate()
                     .request(addHeadersToRequest(request, parseIdToken(it).toMap()))
                     .build()
