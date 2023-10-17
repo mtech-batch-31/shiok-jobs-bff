@@ -28,12 +28,12 @@ class SecurityConfig(
         )
             .addFilterAt(jwtAuthenticationFilter, AUTHENTICATION)
             .authorizeExchange {
-                it.pathMatchers("/api/auth/**", "/api/test", "/api/job/**", "api/user/**")
-                    .permitAll()
-                it.pathMatchers("/api/**")
-                    .hasRole("jobSeeker")
-                    .anyExchange()
+                it.pathMatchers("/api/**", "api/user/**", "api/job/apply")
+                    // .hasRole("jobSeeker")
+                    // .anyExchange()
                     .authenticated()
+                it.pathMatchers("/api/auth/**", "/api/test", "/api/job/**")
+                    .permitAll()
             }
             .csrf { it.disable() }
             .cors { it.configurationSource(corsConfigurationSource()) }
