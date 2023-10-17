@@ -28,7 +28,7 @@ class SecurityConfig(
         )
             .addFilterAt(jwtAuthenticationFilter, AUTHENTICATION)
             .authorizeExchange {
-                it.pathMatchers("/api/**", "api/user/**", "api/job/apply")
+                it.pathMatchers("api/user/**", "api/job/apply")
                     // .hasRole("jobSeeker")
                     // .anyExchange()
                     .authenticated()
