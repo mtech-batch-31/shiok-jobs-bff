@@ -1,7 +1,9 @@
 package com.mtech.sj.bff.auth
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.mtech.sj.bff.auth.dto.TokenResponse
 import com.mtech.sj.bff.config.AppConfig
+import com.mtech.sj.bff.security.JwtPayload.Companion.parseIdToken
 import com.mtech.sj.bff.util.withAwsException
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Repository
@@ -22,7 +24,8 @@ import javax.crypto.spec.SecretKeySpec
 @Repository
 class CognitoClient(
     private val cognitoIdentityProviderClient: CognitoIdentityProviderClient,
-    @Qualifier("appConfig") config: AppConfig
+    @Qualifier("appConfig") config: AppConfig,
+    private val objectMapper: ObjectMapper
 ) {
 
     private val clientId = config.aws.cognito.clientId
@@ -65,12 +68,17 @@ class CognitoClient(
                 .run { TokenResponse(idToken(), accessToken(), refreshToken()) }
         }
 
-    fun refreshToken(refreshToken: String) =
+    fun refreshToken(refreshToken: String, idToken: String) =
         withAwsException {
             cognitoIdentityProviderClient.initiateAuth(
                 InitiateAuthRequest.builder()
                     .authFlow(REFRESH_TOKEN_AUTH)
-                    .authParameters(mapOf("REFRESH_TOKEN" to refreshToken))
+                    .authParameters(
+                        mapOf(
+                            "REFRESH_TOKEN" to refreshToken,
+                            "SECRET_HASH" to calculateSecretHash(clientId, clientSecret, parseIdToken(idToken, objectMapper).email)
+                        )
+                    )
                     .clientId(clientId)
                     .build()
             )

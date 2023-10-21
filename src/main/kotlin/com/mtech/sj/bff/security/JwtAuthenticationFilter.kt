@@ -1,9 +1,9 @@
 package com.mtech.sj.bff.security
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.mtech.sj.bff.auth.CognitoClient
 import com.mtech.sj.bff.exception.UnauthorizedException
+import com.mtech.sj.bff.security.JwtPayload.Companion.parseIdToken
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -32,8 +32,7 @@ class JwtAuthenticationFilter(
             throw UnauthorizedException("Missing access token")
         }
 
-        val headers = parseIdToken(idToken.toString())
-        // Assuming authorities for jobSeeker are assigned based on user details.
+        val headers = parseIdToken(idToken.toString(), objectMapper)
         val authorities = listOf(SimpleGrantedAuthority("jobSeeker"))
 
         val authentication = UsernamePasswordAuthenticationToken(headers.email, null, authorities)
@@ -46,18 +45,6 @@ class JwtAuthenticationFilter(
                     .build()
             } ?: exchange
         ).contextWrite(context)
-    }
-
-    private fun parseIdToken(idToken: String): JwtPayload {
-        val splitToken = idToken.split('.')
-        if (splitToken.size != 3) {
-            throw UnauthorizedException("Invalid JWT token")
-        }
-        val tokenBody = splitToken[1] // 获取 payload
-
-        val decodedJson = String(Base64.getUrlDecoder().decode(tokenBody))
-
-        return objectMapper.readValue(decodedJson)
     }
 
     private fun addHeadersToRequest(request: ServerHttpRequest, headers: Map<String, String?>): ServerHttpRequest {

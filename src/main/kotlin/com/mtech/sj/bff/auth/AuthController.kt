@@ -23,8 +23,10 @@ class AuthController(private val cognitoClient: CognitoClient) {
         Mono.fromCallable { cognitoClient.login(request.email, request.password) }
 
     @GetMapping("/refresh")
-    fun refreshToken(@RequestHeader("x-refresh-token") refreshToken: String) =
-        Mono.fromCallable { cognitoClient.refreshToken(refreshToken) }
+    fun refreshToken(
+        @RequestHeader("x-refresh-token") refreshToken: String,
+        @RequestHeader("x-id-token")idToken: String
+    ) = Mono.fromCallable { cognitoClient.refreshToken(refreshToken, idToken) }
 
     @GetMapping("/logout")
     fun logout(@RequestHeader refreshToken: String) =
