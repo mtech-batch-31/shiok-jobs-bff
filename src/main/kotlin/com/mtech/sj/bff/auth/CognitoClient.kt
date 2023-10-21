@@ -76,7 +76,7 @@ class CognitoClient(
                     .authParameters(
                         mapOf(
                             "REFRESH_TOKEN" to refreshToken,
-                            "SECRET_HASH" to calculateSecretHash(clientId, clientSecret, parseIdToken(idToken, objectMapper).email)
+                            "SECRET_HASH" to calculateSecretHash(clientId, clientSecret, parseIdToken(idToken, objectMapper).userId)
                         )
                     )
                     .clientId(clientId)
