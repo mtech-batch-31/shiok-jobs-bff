@@ -2,7 +2,6 @@ package com.mtech.sj.bff.security
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.mtech.sj.bff.auth.CognitoClient
-import com.mtech.sj.bff.exception.UnauthorizedException
 import com.mtech.sj.bff.security.JwtPayload.Companion.parseIdToken
 import org.springframework.http.server.reactive.ServerHttpRequest
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -13,7 +12,6 @@ import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
 import reactor.core.publisher.Mono
-import java.util.*
 
 @Component
 class JwtAuthenticationFilter(
@@ -28,23 +26,20 @@ class JwtAuthenticationFilter(
 
         accessToken?.also { cognitoClient.validate(it) }
 
-        if (accessToken == null) {
-            throw UnauthorizedException("Missing access token")
-        }
-
-        val headers = parseIdToken(idToken.toString(), objectMapper)
-        val authorities = listOf(SimpleGrantedAuthority("jobSeeker"))
-
-        val authentication = UsernamePasswordAuthenticationToken(headers.email, null, authorities)
-        val context = ReactiveSecurityContextHolder.withAuthentication(authentication)
-
         return chain.filter(
             idToken?.let {
                 exchange.mutate()
-                    .request(addHeadersToRequest(request, headers.toMap()))
+                    .request(addHeadersToRequest(request, parseIdToken(idToken.toString(), objectMapper).toMap()))
                     .build()
             } ?: exchange
-        ).contextWrite(context)
+        ).contextWrite { context ->
+            idToken?.let {
+                val email = parseIdToken(it, objectMapper).email
+                val authorities = listOf(SimpleGrantedAuthority("jobSeeker"))
+                val authentication = UsernamePasswordAuthenticationToken(email, null, authorities)
+                ReactiveSecurityContextHolder.withAuthentication(authentication)
+            } ?: context
+        }
     }
 
     private fun addHeadersToRequest(request: ServerHttpRequest, headers: Map<String, String?>): ServerHttpRequest {
