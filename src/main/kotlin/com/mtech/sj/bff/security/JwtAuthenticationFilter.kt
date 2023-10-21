@@ -17,8 +17,8 @@ import java.util.*
 
 @Component
 class JwtAuthenticationFilter(
-        private val cognitoClient: CognitoClient,
-        private val objectMapper: ObjectMapper
+    private val cognitoClient: CognitoClient,
+    private val objectMapper: ObjectMapper
 ) : WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val request = exchange.request
@@ -41,7 +41,6 @@ class JwtAuthenticationFilter(
 
         return chain.filter(
             idToken?.let {
-
                 exchange.mutate()
                     .request(addHeadersToRequest(request, headers.toMap()))
                     .build()
