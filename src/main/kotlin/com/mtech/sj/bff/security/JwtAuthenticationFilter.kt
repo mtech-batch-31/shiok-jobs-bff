@@ -1,10 +1,13 @@
-package com.mtech.sj.bff.auth
+package com.mtech.sj.bff.security
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.mtech.sj.bff.auth.CognitoClient
 import com.mtech.sj.bff.exception.UnauthorizedException
-import com.mtech.sj.bff.security.JwtPayload
 import org.springframework.http.server.reactive.ServerHttpRequest
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
@@ -14,8 +17,8 @@ import java.util.*
 
 @Component
 class JwtAuthenticationFilter(
-    private val cognitoClient: CognitoClient,
-    private val objectMapper: ObjectMapper
+        private val cognitoClient: CognitoClient,
+        private val objectMapper: ObjectMapper
 ) : WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         val request = exchange.request
@@ -25,17 +28,25 @@ class JwtAuthenticationFilter(
 
         accessToken?.also { cognitoClient.validate(it) }
 
+        if (accessToken == null) {
+            throw UnauthorizedException("Missing access token")
+        }
+
+        val headers = parseIdToken(idToken.toString())
+        // Assuming authorities for jobSeeker are assigned based on user details.
+        val authorities = listOf(SimpleGrantedAuthority("jobSeeker"))
+
+        val authentication = UsernamePasswordAuthenticationToken(headers.email, null, authorities)
+        val context = ReactiveSecurityContextHolder.withAuthentication(authentication)
+
         return chain.filter(
             idToken?.let {
-                if (accessToken == null) {
-                    throw UnauthorizedException("Missing access token")
-                }
 
                 exchange.mutate()
-                    .request(addHeadersToRequest(request, parseIdToken(it).toMap()))
+                    .request(addHeadersToRequest(request, headers.toMap()))
                     .build()
             } ?: exchange
-        )
+        ).contextWrite(context)
     }
 
     private fun parseIdToken(idToken: String): JwtPayload {

@@ -1,6 +1,6 @@
 package com.mtech.sj.bff.config
 
-import com.mtech.sj.bff.auth.JwtAuthenticationFilter
+import com.mtech.sj.bff.security.JwtAuthenticationFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
@@ -26,12 +26,12 @@ class SecurityConfig(
                 "/api/**"
             )
         )
+
             .addFilterAt(jwtAuthenticationFilter, AUTHENTICATION)
             .authorizeExchange {
-                it.pathMatchers("api/user/**", "api/job/apply")
-                    // .hasRole("jobSeeker")
-                    // .anyExchange()
-                    .authenticated()
+                it.pathMatchers("/api/user/**", "/api/job/apply")
+                        .authenticated()
+
                 it.pathMatchers("/api/auth/**", "/api/test", "/api/job/**")
                     .permitAll()
             }
