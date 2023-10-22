@@ -23,11 +23,11 @@ spec:
           image: ${IMAGE_NAME}
           resources:
             requests:
-              cpu: 150m
-              memory: 350Mi
+              cpu: 100m
+              memory: 50Mi
             limits:
-              cpu: 500m
-              memory: 500Mi
+              cpu: 150m
+              memory: 100Mi
           env:
             - name: COGNITO_CLIENT_ID
               value: ${COGNITO_CLIENT_ID}
