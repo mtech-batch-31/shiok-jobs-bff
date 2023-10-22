@@ -24,10 +24,10 @@ spec:
           resources:
             requests:
               cpu: 150m
-              memory: "250Mi"
+              memory: 250Mi
             limits:
               cpu: 500m
-              memory: "300Mi"
+              memory: 300Mi
           env:
             - name: COGNITO_CLIENT_ID
               value: ${COGNITO_CLIENT_ID}
