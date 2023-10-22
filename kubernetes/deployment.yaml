@@ -21,6 +21,13 @@ spec:
       containers:
         - name: sj-bff
           image: ${IMAGE_NAME}
+          resources:
+            requests:
+              cpu: 150m
+              memory: "250Mi"
+            limits:
+              cpu: 500m
+              memory: "300Mi"
           env:
             - name: COGNITO_CLIENT_ID
               value: ${COGNITO_CLIENT_ID}
@@ -36,14 +43,6 @@ spec:
 
             - name: USER_SERVICE
               value: ${USER_SERVICE_URL}
-
-          resources:
-            requests:
-              cpu: "150m"
-              memory: "250Mi"
-            limits:
-              cpu: "300m"
-              memory: "400Mi"
 
           imagePullPolicy: Always
           ports:
