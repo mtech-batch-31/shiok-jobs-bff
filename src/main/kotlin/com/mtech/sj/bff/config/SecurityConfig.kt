@@ -28,7 +28,7 @@ class SecurityConfig(
         )
             .addFilterAt(jwtAuthenticationFilter, AUTHENTICATION)
             .authorizeExchange {
-                it.pathMatchers("/api/user/**", "/api/job/apply")
+                it.pathMatchers("/api/user/**", "/api/job/apply", "/api/job/auth/**")
                     .authenticated()
 
                 it.pathMatchers("/api/auth/**", "/api/test", "/api/job/**")
