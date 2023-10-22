@@ -37,6 +37,12 @@ spec:
             - name: USER_SERVICE
               value: ${USER_SERVICE_URL}
 
+          resources:
+            requests:
+              cpu: 250m
+            limits:
+              cpu: 500m
+
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
