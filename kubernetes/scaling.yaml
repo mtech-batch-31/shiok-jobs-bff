@@ -9,7 +9,7 @@ spec:
     kind: Deployment
     name: sj-bff
   minReplicas: 2
-  maxReplicas: 5
+  maxReplicas: 6
   metrics:
     - type: Resource
       resource:
@@ -17,4 +17,11 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
+
+  behavior:
+    scaleDown:
+      policies:
+        - periodSeconds: 10
+          type: Pod
+          value: 1
 
