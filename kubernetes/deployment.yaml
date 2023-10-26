@@ -22,8 +22,12 @@ spec:
         - name: sj-bff
           image: ${IMAGE_NAME}
           resources:
+            requests:
+              memory: 256Mi
+              cpu: 500m
             limits:
               memory: 256Mi
+              cpu: 500m
           env:
             - name: COGNITO_CLIENT_ID
               value: ${COGNITO_CLIENT_ID}
