@@ -9,12 +9,12 @@ spec:
     kind: Deployment
     name: sj-bff
   minReplicas: 1
-  maxReplicas: 8
+  maxReplicas: 6
   metrics:
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 60
+          averageUtilization: 80
 
